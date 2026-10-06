@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, Link } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { mockBusinesses } from "./data/mockBusinesses";
 import { translations } from "./data/translations";
+import Navbar from "./components/Navbar";
 import BusinessCard from "./components/BusinessCard";
 import BusinessRoute from "./components/BusinessRoute";
 import RegisterModal from "./components/RegisterModal";
 import HeroLanding from "./components/HeroLanding";
 import Footer from "./components/Footer";
-import { Search, Globe } from "lucide-react";
+import AboutPage from "./pages/AboutPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import ContactPage from "./pages/ContactPage";
+import { Search } from "lucide-react";
 
 const CATEGORY_KEYS = ["All", "Crafts & Leather", "Food & Pastry", "Beauty", "Home Decor"];
 
@@ -43,14 +47,13 @@ export default function App() {
       );
     } else {
       setBusinesses((prev) => [businessData, ...prev]);
-      // Navigate straight to the newly registered business page
       navigate(`/biz/${businessData.id}`);
     }
     setEditingBusiness(null);
   };
 
   const handleDeleteBusiness = (id) => {
-    if (window.confirm("Are you sure you want to remove this business listing?")) {
+    if (window.confirm("Are you sure you want to remove this listing?")) {
       setBusinesses((prev) => prev.filter((b) => b.id !== id));
       navigate("/");
     }
@@ -88,43 +91,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between">
       <div>
-        {/* Top Navbar */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
-          <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
-            <Link
-              to="/"
-              onClick={() => setSearchTerm("")}
-              className="text-2xl font-black text-emerald-600 tracking-tight cursor-pointer"
-            >
-              {t.brandName}
-            </Link>
+        {/* Persistent Global Navbar */}
+        <Navbar
+          lang={lang}
+          toggleLanguage={toggleLanguage}
+          onOpenRegister={() => {
+            setEditingBusiness(null);
+            setIsRegisterOpen(true);
+          }}
+          t={t}
+        />
 
-            <div className="flex items-center gap-2.5">
-              <button
-                onClick={toggleLanguage}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition"
-              >
-                <Globe size={14} />
-                <span>{lang === "en" ? "አማርኛ" : "English"}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setEditingBusiness(null);
-                  setIsRegisterOpen(true);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition shadow-sm"
-              >
-                {t.registerBtn}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Body with Routes */}
-        <main className="max-w-4xl mx-auto px-4 py-6">
-          <Routes>
-            {/* Home Directory View */}
+        {/* Dynamic Route Pages */}
+<main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-8">          <Routes>
+            {/* Main Explore Directory View */}
             <Route
               path="/"
               element={
@@ -201,11 +181,28 @@ export default function App() {
               }
             />
 
-            {/* Individual Business Profile Route */}
+            {/* Individual Business Storefront */}
             <Route
               path="/biz/:id"
               element={<BusinessRoute businesses={businesses} t={t} />}
             />
+
+            {/* Dedicated Categories Hub */}
+            <Route
+              path="/categories"
+              element={
+                <CategoriesPage
+                  lang={lang}
+                  onSelectCategory={(cat) => setActiveCategory(cat)}
+                />
+              }
+            />
+
+            {/* About Page */}
+            <Route path="/about" element={<AboutPage lang={lang} />} />
+
+            {/* Contact & Support Page */}
+            <Route path="/contact" element={<ContactPage lang={lang} />} />
           </Routes>
         </main>
       </div>
